@@ -33,8 +33,7 @@
     (compound-statement-statement
         (compound-statement Compound-Statement?))
     (simple-statement-statement
-        (simple-statement Simple-Statement?))
-    )
+        (simple-statement Simple-Statement?)))
 
 (define-datatype Simple-Statement Simple-Statement?
     (assignment-simple-statement
@@ -46,18 +45,17 @@
 (define-datatype Compound-Statement Compound-Statement?
 ;    (a-function-definition
 ;        (function-definition Function-Definition?))
-    (an-if-statement
+    (if-compound-statment
         (if-statement If-Statement?))
 ;    (a-for-statement
 ;        (for-statement For-Statement?))
-    )
+		)
 
 
 (define-datatype Assignment Assignment?
     (assignment
         (id symbol?)
-        (expression Expression?))
-    )
+        (expression Expression?)))
 
 (define-datatype Return-Statement Return-Statement?
 	(simple-return)
@@ -96,24 +94,24 @@
 		(sum Sum?)))
 
 (define-datatype Disjunction Disjunction?
-	(conjunction-expression
+	(conjunction-disjunction
 		(conjunction Conjunction?))
-	(or-expression
+	(or-disjunction
 		(disjunction Disjunction?)
 		(conjunction Conjunction?)))
 	
 
 (define-datatype Conjunction Conjunction?
-	(inversion-expression
+	(inversion-conjunction
 		(inversion Inversion?))
-	(and-expression
+	(and-conjunction
 		(conjunction Conjunction?)
 		(inversion Inversion?)))
 
 (define-datatype Inversion Inversion?
-	(simple-inversion
+	(not-inversion
 		(inversion Inversion?))
-	(comparison-expression
+	(comparison-inversion
 		(comparison Comparison?)))
 
 
