@@ -26,7 +26,14 @@
 
 (define-datatype Program Program?
     (program
-        (statements (non-empty-list-of Statement?))))
+        (statements Statements?)))
+
+(define-datatype Statements Statements?
+	(single-statement
+		(statement Statement?))
+	(multiple-statements
+		(statements Statements?)
+		(statement Statement?)))
 
 
 (define-datatype Statement Statement?
@@ -43,14 +50,12 @@
     (pass-simple-statement))
 
 (define-datatype Compound-Statement Compound-Statement?
-;    (a-function-definition
-;        (function-definition Function-Definition?))
+    (function-definition-compound-statement
+        (function-definition Function-Definition?))
     (if-compound-statment
         (if-statement If-Statement?))
-;    (a-for-statement
-;        (for-statement For-Statement?))
-		)
-
+    (for-statement-compound-statement
+        (for-statement For-Statement?)))
 
 (define-datatype Assignment Assignment?
     (assignment
@@ -61,19 +66,17 @@
 	(simple-return)
 	(expression-return
 		(expression Expression?)))
-#|
 
-(define-datetype Function-Definition Function-Definition?
+(define-datatype Function-Definition Function-Definition?
     (function
         (id symbol?)
         (params (list-of Param?))
         (statements (list-of Statement?))))
 
-(define-datatype )
-
-
-|#
-
+(define-datatype Param Param?
+	(param
+		(id symbol?)
+		(default-value Expression?)))
 
 
 (define-datatype If-Statement If-Statement?
@@ -85,6 +88,13 @@
 (define-datatype Else-Block Else-Block?
 	(else-block
 		(else-statements (non-empty-list-of Statement?))))
+
+(define-datatype For-Statement For-Statement?
+	(for
+		(id symbol?)
+		(expression Expression?)
+		(statements Statements?)))
+
 
 
 (define-datatype Expression Expression?
@@ -153,8 +163,48 @@
 		(factor Factor?))
 	(minus
 		(factor Factor?))
-;	(power-factor
-;		(power Power?))
-		)
+	(power-factor
+		(power Power?)))
+
+
+(define-datatype Power Power?
+	(power
+		(atom Atom?)
+		(factor Factor?))
+	(primary-power
+		(primary Primary?)))
+
+(define-datatype primary Primary?
+	(atom-primary
+		(atom Atom?))
+	(array-ref
+		(primary Primary?)
+		(expression Expression?))
+	(simple-call
+		(primary Primary?))
+	(argument-call
+		(primary Primary?)
+		(arguments Arguments?)))
+
+(define-datatype Arguments Arguments?
+	(single-argument
+		(expression Expression?))
+	(multiple-arguments
+		(arguments Arguments?)
+		(expression Expression?)))
+
+(define-datatype Atom Atom?	
+	(id-atom	
+		(id symbol?))
+	(true-atom)	
+	(false-atom)
+	(none-atom)
+	(number-atom)
+	(list-atom
+		(lis List?)))
+	
+(define-datatype List List?
+	(a-list
+		(lis (non-empty-list-of Expression?))))
 		
 
