@@ -1,5 +1,23 @@
 #lang racket
 
+(provide program single-statement multiple-statements
+         compound-statement-statement simple-statement-statement
+         assignment-simple-statement return-simple-statement
+         pass-simple-statement function-definition-compound-statement
+         if-compound-statment for-statement-compound-statement assignment
+         simple-return expression-return function-with-params
+         function-with-no-param if-statement
+         else-block for disjunction-expression sum-expression
+         conjunction-disjunction or-disjunction inversion-conjunction
+         and-conjunction not-inversion comparison-inversion
+         eq-sum-comparison lt-sum-comparison gt-sum-comparison
+         eq-sum single-param multiple-params param
+         lt-sum gt-sum addition subtraction term-sum muliplication
+         division factor-term plus minus power-factor power
+         primary-power atom-primary array-ref simple-call argument-call
+         single-argument multiple-arguments id-atom true-atom false-atom
+         none-atom number-atom list-atom expression-list single-expression
+         multiple-expressions empty-list)
 
 (require (lib "eopl.ss"  "eopl"))
 
@@ -136,11 +154,11 @@
 
 (define-datatype Comparison Comparison?
 	(eq-sum-comparison
-		(eq-sum Eq-Sum?)
+		(eq-sum Eq-Sum?))
 	(lt-sum-comparison
 		(lt-sum Lt-Sum?))
 	(gt-sum-comparison
-		(gt-sum Gt-Sum?))))
+		(gt-sum Gt-Sum?)))
 
 
 (define-datatype Eq-Sum Eq-Sum?
@@ -162,7 +180,7 @@
 (define-datatype Sum Sum?
 	(addition
 		(sum Sum?)
-		(term Sum?))
+		(term Term?))
 	(subtraction
 		(sum Sum?)
 		(term Term?))
@@ -222,7 +240,8 @@
 	(true-atom)	
 	(false-atom)
 	(none-atom)
-	(number-atom)
+	(number-atom
+                (number number?))
 	(list-atom
 		(lis List?)))
 	
