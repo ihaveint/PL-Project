@@ -68,16 +68,25 @@
 		(expression Expression?)))
 
 (define-datatype Function-Definition Function-Definition?
-    (function
-        (id symbol?)
-        (params (list-of Param?))
-        (statements (list-of Statement?))))
+	(function-with-params
+		(id symbol?)
+		(params Params?)
+		(statements Statements?))
+	(function-with-no-param
+			(id symbol?)
+			(statements Statements?)))
+
+(define-datatype Params Params?
+	(single-param
+		(param Param?))
+	(multiple-params
+		(params Params?)
+		(param Param?)))
 
 (define-datatype Param Param?
 	(param
 		(id symbol?)
 		(default-value Expression?)))
-
 
 (define-datatype If-Statement If-Statement?
 	(if-statement
@@ -126,12 +135,26 @@
 
 
 (define-datatype Comparison Comparison?
+	(eq-sum-comparison
+		(eq-sum Eq-Sum?)
+	(lt-sum-comparison
+		(lt-sum Lt-Sum?))
+	(gt-sum-comparison
+		(gt-sum Gt-Sum?))))
+
+
+(define-datatype Eq-Sum Eq-Sum?
 	(eq-sum
 		(left-sum Sum?)
-		(right-sum Sum?))
+		(right-sum Sum?)))
+
+
+(define-datatype Lt-Sum Lt-Sum?
 	(lt-sum
 		(left-sum Sum?)
-		(right-sum Sum?))
+		(right-sum Sum?)))
+
+(define-datatype Gt-Sum Gt-Sum?
 	(gt-sum
 		(left-sum Sum?)
 		(right-sum Sum?)))
