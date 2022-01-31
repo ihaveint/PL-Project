@@ -178,7 +178,7 @@
 	(primary-power
 		(primary Primary?)))
 
-(define-datatype primary Primary?
+(define-datatype Primary Primary?
 	(atom-primary
 		(atom Atom?))
 	(array-ref

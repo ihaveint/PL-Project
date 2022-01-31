@@ -4,21 +4,17 @@ import re
 value_of_template = """
 (define interpret-{}
 	(lambda ({})
-		(cases {} {}
-			{}
-			(else ))))	
+		(cases {} {} {}
+			(else (displayln "ooops")))))	
 """
 
 cases_template = """
 			({} ({})
-				(begin
-					{}	
-				))
-"""
+				(begin {}	
+				))"""
 
-cases_inner_template = """ 
-				(interpret-{} {})
-"""
+cases_inner_template = """
+					(interpret-{} {})"""
 
 def process_subtype(l):
 	subtype = tokens[l + 1] 	
@@ -27,12 +23,18 @@ def process_subtype(l):
 	variables = []
 	types = []
 	inner = ""
+	real_cnt = 0
 	while s < r:
 		name = tokens[s + 1]
+		var_type = tokens[s + 2][:-1]
 		variables.append(name)
-		inner += cases_inner_template.format(tokens[s + 2][:-1], name)
+		if not var_type in ["symbol", "number"]:
+				inner += cases_inner_template.format(tokens[s + 2][:-1], name)
+				real_cnt += 1
 		s = match[s] + 1
 	
+	if real_cnt == 0:
+		inner = "\n					(void) " + inner
 	return cases_template.format(subtype, ' '.join(variables), inner)	
 
 
@@ -82,6 +84,4 @@ for i, token in enumerate(tokens):
 	if token == "(" and tokens[i + 1] == "define-datatype":
 		x = process_datatype(i)
 		print(x)
-
-
 
