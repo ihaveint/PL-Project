@@ -227,8 +227,9 @@
 		(lis List?)))
 	
 (define-datatype List List?
-	(a-list
-		(lis (non-empty-list-of Expressions?))))
+	(expression-list
+		(expressions Expressions?))
+	(empty-list))
 	
 (define-datatype Expressions Expressions?
 	(single-expression
