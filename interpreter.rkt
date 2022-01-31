@@ -228,6 +228,13 @@
 	
 (define-datatype List List?
 	(a-list
-		(lis (non-empty-list-of Expression?))))
+		(lis (non-empty-list-of Expressions?))))
+	
+(define-datatype Expressions Expressions?
+	(single-expression
+		(expression Expression?))
+	(multiple-expressions
+		(expressions Expressions?)
+		(expression Expression?)))
 		
 
