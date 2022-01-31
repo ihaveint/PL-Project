@@ -24,28 +24,25 @@
     (lexer-imp input-port)]
    [(:: (:+ digit) (:? ".") (:* digit))
     (token-NUM (string->number lexeme))]
-   [(:: (:+ char))
-    (token-ID (string->symbol lexeme))]
    ["+" (token-plus)]
    ["-" (token-minus)]
    ["*" (token-mult)]
    ["**" (token-power)]
-   ["=" (token-equal)]
    ["==" (token-double_equal)]
+   ["=" (token-equal)]
    ["," (token-comma)]
-   ["(" (token-lBracket)]
-   [")" (token-rBracket)]
    ["and" (token-and)]
    ["or" (token-or)]
    [";" (token-semicolon)]
    ["/" (token-division)]
-   [";" (token-colon)]
+   [":" (token-colon)]
    [">" (token-greater)]
-   [";" (token-less)]
+   ["<" (token-less)]
    ["if" (token-if)]
    ["else" (token-else)]
    ["for" (token-for)]
    ["in" (token-in)]
+   ["()" (token-EMPTY_PARAMS)]
    ["[" (token-rBracket)]
    [")" (token-rParen)]
    ["[" (token-lBracket)]
@@ -54,6 +51,11 @@
    ["False" (token-False)]
    ["None" (token-NONE)]
    ["def" (token-def)]
+   ["return" (token-return)]
+   ["pass" (token-pass)]
+   [(:: (:+ char))
+    (token-ID (string->symbol lexeme))]
+   
    ))
 
 
@@ -78,8 +80,8 @@
     (Assignment ((ID equal Expression) (assignment $1 $3)))
     (Return_stmt ((return) (simple-return))
                  ((return Expression) (expression-return $2)))
-    (Function_def ((def ID lParen Params rParen semicolon Statements) (function-with-params $2 $4 $7))
-                  ((def ID EMPTY_PARAMS Statements) (function-with-no-param $2 $4)))
+    (Function_def ((def ID lParen Params rParen colon Statements) (function-with-params $2 $4 $7))
+                  ((def ID EMPTY_PARAMS colon Statements) (function-with-no-param $2 $5)))
     (Params ((Param_with_default) (single-param $1))
                   ((Params comma Param_with_default) (multiple-params $1 $3)))
     (Param_with_default ((ID equal Expression) (param $1 $3)))
