@@ -2,20 +2,22 @@ import re
 
 
 value_of_template = """
-
-	(define value-of-{}
-		(lambda ({})
-			(cases {} {}
-				
-				{}
-
-				(else )
-									 )))	
+(define interpret-{}
+	(lambda ({})
+		(cases {} {}
+			{}
+			(else ))))	
 """
 
 cases_template = """
-				({} ({})
-					...)
+			({} ({})
+				(begin
+					{}	
+				))
+"""
+
+cases_inner_template = """ 
+				(interpret-{} {})
 """
 
 def process_subtype(l):
@@ -23,16 +25,21 @@ def process_subtype(l):
 	r = match[l]
 	s = l + 2	
 	variables = []
+	types = []
+	inner = ""
 	while s < r:
-		variables.append(tokens[s + 1])
+		name = tokens[s + 1]
+		variables.append(name)
+		inner += cases_inner_template.format(tokens[s + 2][:-1], name)
 		s = match[s] + 1
-	return cases_template.format(subtype, ' '.join(variables))	
+	
+	return cases_template.format(subtype, ' '.join(variables), inner)	
 
 
 def process_datatype(l):
 	r = match[l]
-	non_terminal = tokens[l + 2].lower()
-	variable = non_terminal + "-var"
+	non_terminal = tokens[l + 2]
+	variable = non_terminal.lower() + "-var"
 	
 	cases = ""
 
@@ -46,7 +53,7 @@ def process_datatype(l):
 	return value_of
 
 
-f = open("interpreter.rkt", "r")
+f = open("grammar-datatypes.rkt", "r")
 lines = f.readlines()
 f.close()
 lines = list(filter(lambda line: not line.strip().startswith(";"), lines))
@@ -56,7 +63,6 @@ all_text = re.sub('\(', ' ( ', all_text)
 all_text = re.sub('\)', ' ) ', all_text)
 all_text = re.sub('\s+', ' ', all_text)
 tokens = re.split(' ', all_text)
-print(tokens)
 
 
 stack = []

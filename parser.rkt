@@ -5,7 +5,7 @@
          (prefix-in : parser-tools/lex-sre)
          parser-tools/yacc)
 
-(require "interpreter.rkt")
+(require "grammar-datatypes.rkt")
 
 
 (define-tokens value-tokens (NUM ID BOOL))

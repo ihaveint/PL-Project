@@ -1,260 +1,704 @@
 #lang racket
 
-(provide program single-statement multiple-statements
-         compound-statement-statement simple-statement-statement
-         assignment-simple-statement return-simple-statement
-         pass-simple-statement function-definition-compound-statement
-         if-compound-statment for-statement-compound-statement assignment
-         simple-return expression-return function-with-params
-         function-with-no-param if-statement
-         else-block for disjunction-expression sum-expression
-         conjunction-disjunction or-disjunction inversion-conjunction
-         and-conjunction not-inversion comparison-inversion
-         eq-sum-comparison lt-sum-comparison gt-sum-comparison
-         eq-sum single-param multiple-params param
-         lt-sum gt-sum addition subtraction term-sum muliplication
-         division factor-term plus minus power-factor power
-         primary-power atom-primary array-ref simple-call argument-call
-         single-argument multiple-arguments id-atom true-atom false-atom
-         none-atom number-atom list-atom expression-list single-expression
-         multiple-expressions empty-list)
-
 (require (lib "eopl.ss"  "eopl"))
 
 
-; util
-
-(define list-of
-  (lambda (pred)
-    (lambda (val)
-      (or (null? val)
-          (and (pair? val)
-               (pred (car val))
-               ((list-of pred) (cdr val)))))))
-
-(define non-empty-list-of
-    (lambda (predicate)
-        (lambda (l)
-            (and 
-                (not (null? l)) 
-                (predicate (first l) 
-                ((list-of predicate) (rest l)))))))
-
-; datatypes
-
-(define-datatype Program Program?
-    (program
-        (statements Statements?)))
-
-(define-datatype Statements Statements?
-	(single-statement
-		(statement Statement?))
-	(multiple-statements
-		(statements Statements?)
-		(statement Statement?)))
-
-
-(define-datatype Statement Statement?
-    (compound-statement-statement
-        (compound-statement Compound-Statement?))
-    (simple-statement-statement
-        (simple-statement Simple-Statement?)))
-
-(define-datatype Simple-Statement Simple-Statement?
-    (assignment-simple-statement
-        (assignment Assignment?))
-    (return-simple-statement
-        (return-statement Return-Statement?))
-    (pass-simple-statement))
-
-(define-datatype Compound-Statement Compound-Statement?
-    (function-definition-compound-statement
-        (function-definition Function-Definition?))
-    (if-compound-statment
-        (if-statement If-Statement?))
-    (for-statement-compound-statement
-        (for-statement For-Statement?)))
-
-(define-datatype Assignment Assignment?
-    (assignment
-        (id symbol?)
-        (expression Expression?)))
-
-(define-datatype Return-Statement Return-Statement?
-	(simple-return)
-	(expression-return
-		(expression Expression?)))
-
-(define-datatype Function-Definition Function-Definition?
-	(function-with-params
-		(id symbol?)
-		(params Params?)
-		(statements Statements?))
-	(function-with-no-param
-			(id symbol?)
-			(statements Statements?)))
-
-(define-datatype Params Params?
-	(single-param
-		(param Param?))
-	(multiple-params
-		(params Params?)
-		(param Param?)))
-
-(define-datatype Param Param?
-	(param
-		(id symbol?)
-		(default-value Expression?)))
-
-(define-datatype If-Statement If-Statement?
-	(if-statement
-		(if-expression Expression?)
-		(if-body (non-empty-list-of Statement?))
-		(else-body Else-Block?)))
-
-(define-datatype Else-Block Else-Block?
-	(else-block
-		(else-statements (non-empty-list-of Statement?))))
-
-(define-datatype For-Statement For-Statement?
-	(for
-		(id symbol?)
-		(expression Expression?)
-		(statements Statements?)))
-
-
-
-(define-datatype Expression Expression?
-	(disjunction-expression
-		(disjunction Disjunction?))
-	(sum-expression
-		(sum Sum?)))
-
-(define-datatype Disjunction Disjunction?
-	(conjunction-disjunction
-		(conjunction Conjunction?))
-	(or-disjunction
-		(disjunction Disjunction?)
-		(conjunction Conjunction?)))
+	(define interpret-Program
+		(lambda (program-var)
+			(cases Program program-var
+				
+				(program (statements)
+					(begin
+						 (interpret-Statements statements)
 	
-
-(define-datatype Conjunction Conjunction?
-	(inversion-conjunction
-		(inversion Inversion?))
-	(and-conjunction
-		(conjunction Conjunction?)
-		(inversion Inversion?)))
-
-(define-datatype Inversion Inversion?
-	(not-inversion
-		(inversion Inversion?))
-	(comparison-inversion
-		(comparison Comparison?)))
+					))
 
 
-(define-datatype Comparison Comparison?
-	(eq-sum-comparison
-		(eq-sum Eq-Sum?))
-	(lt-sum-comparison
-		(lt-sum Lt-Sum?))
-	(gt-sum-comparison
-		(gt-sum Gt-Sum?)))
+				(else )
+									 )))	
 
 
-(define-datatype Eq-Sum Eq-Sum?
-	(eq-sum
-		(left-sum Sum?)
-		(right-sum Sum?)))
-
-
-(define-datatype Lt-Sum Lt-Sum?
-	(lt-sum
-		(left-sum Sum?)
-		(right-sum Sum?)))
-
-(define-datatype Gt-Sum Gt-Sum?
-	(gt-sum
-		(left-sum Sum?)
-		(right-sum Sum?)))
+	(define interpret-Statements
+		(lambda (statements-var)
+			(cases Statements statements-var
+				
+				(single-statement (statement)
+					(begin
+						 (interpret-Statement statement)
 	
-(define-datatype Sum Sum?
-	(addition
-		(sum Sum?)
-		(term Term?))
-	(subtraction
-		(sum Sum?)
-		(term Term?))
-	(term-sum
-		(term Term?)))
+					))
 
 
-(define-datatype Term Term?
-	(muliplication
-		(term Term?)
-		(factor Factor?))
-	(division
-		(term Term?)
-		(factor Factor?))
-	(factor-term
-		(factor Factor?)))
-
-
-(define-datatype Factor Factor?
-	(plus
-		(factor Factor?))
-	(minus
-		(factor Factor?))
-	(power-factor
-		(power Power?)))
-
-
-(define-datatype Power Power?
-	(power
-		(atom Atom?)
-		(factor Factor?))
-	(primary-power
-		(primary Primary?)))
-
-(define-datatype primary Primary?
-	(atom-primary
-		(atom Atom?))
-	(array-ref
-		(primary Primary?)
-		(expression Expression?))
-	(simple-call
-		(primary Primary?))
-	(argument-call
-		(primary Primary?)
-		(arguments Arguments?)))
-
-(define-datatype Arguments Arguments?
-	(single-argument
-		(expression Expression?))
-	(multiple-arguments
-		(arguments Arguments?)
-		(expression Expression?)))
-
-(define-datatype Atom Atom?	
-	(id-atom	
-		(id symbol?))
-	(true-atom)	
-	(false-atom)
-	(none-atom)
-	(number-atom
-                (number number?))
-	(list-atom
-		(lis List?)))
+				(multiple-statements (statements statement)
+					(begin
+						 (interpret-Statements statements)
+ (interpret-Statement statement)
 	
-(define-datatype List List?
-	(expression-list
-		(expressions Expressions?))
-	(empty-list))
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Statement
+		(lambda (statement-var)
+			(cases Statement statement-var
+				
+				(compound-statement-statement (compound-statement)
+					(begin
+						 (interpret-Compound-Statement compound-statement)
 	
-(define-datatype Expressions Expressions?
-	(single-expression
-		(expression Expression?))
-	(multiple-expressions
-		(expressions Expressions?)
-		(expression Expression?)))
-		
+					))
+
+
+				(simple-statement-statement (simple-statement)
+					(begin
+						 (interpret-Simple-Statement simple-statement)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Simple-Statement
+		(lambda (simple-statement-var)
+			(cases Simple-Statement simple-statement-var
+				
+				(assignment-simple-statement (assignment)
+					(begin
+						 (interpret-Assignment assignment)
+	
+					))
+
+
+				(return-simple-statement (return-statement)
+					(begin
+						 (interpret-Return-Statement return-statement)
+	
+					))
+
+
+				(pass-simple-statement ()
+					(begin
+							
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Compound-Statement
+		(lambda (compound-statement-var)
+			(cases Compound-Statement compound-statement-var
+				
+				(function-definition-compound-statement (function-definition)
+					(begin
+						 (interpret-Function-Definition function-definition)
+	
+					))
+
+
+				(if-compound-statment (if-statement)
+					(begin
+						 (interpret-If-Statement if-statement)
+	
+					))
+
+
+				(for-statement-compound-statement (for-statement)
+					(begin
+						 (interpret-For-Statement for-statement)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Assignment
+		(lambda (assignment-var)
+			(cases Assignment assignment-var
+				
+				(assignment (id expression)
+					(begin
+						 (interpret-symbol id)
+ (interpret-Expression expression)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Return-Statement
+		(lambda (return-statement-var)
+			(cases Return-Statement return-statement-var
+				
+				(simple-return ()
+					(begin
+							
+					))
+
+
+				(expression-return (expression)
+					(begin
+						 (interpret-Expression expression)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Function-Definition
+		(lambda (function-definition-var)
+			(cases Function-Definition function-definition-var
+				
+				(function-with-params (id params statements)
+					(begin
+						 (interpret-symbol id)
+ (interpret-Params params)
+ (interpret-Statements statements)
+	
+					))
+
+
+				(function-with-no-param (id statements)
+					(begin
+						 (interpret-symbol id)
+ (interpret-Statements statements)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Params
+		(lambda (params-var)
+			(cases Params params-var
+				
+				(single-param (param)
+					(begin
+						 (interpret-Param param)
+	
+					))
+
+
+				(multiple-params (params param)
+					(begin
+						 (interpret-Params params)
+ (interpret-Param param)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Param
+		(lambda (param-var)
+			(cases Param param-var
+				
+				(param (id default-value)
+					(begin
+						 (interpret-symbol id)
+ (interpret-Expression default-value)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-If-Statement
+		(lambda (if-statement-var)
+			(cases If-Statement if-statement-var
+				
+				(if-statement (if-expression if-body else-body)
+					(begin
+						 (interpret-Expression if-expression)
+ (interpret-Statements if-body)
+ (interpret-Else-Block else-body)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Else-Block
+		(lambda (else-block-var)
+			(cases Else-Block else-block-var
+				
+				(else-block (else-statements)
+					(begin
+						 (interpret-Statements else-statements)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-For-Statement
+		(lambda (for-statement-var)
+			(cases For-Statement for-statement-var
+				
+				(for (id expression statements)
+					(begin
+						 (interpret-symbol id)
+ (interpret-Expression expression)
+ (interpret-Statements statements)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Expression
+		(lambda (expression-var)
+			(cases Expression expression-var
+				
+				(disjunction-expression (disjunction)
+					(begin
+						 (interpret-Disjunction disjunction)
+	
+					))
+
+
+				(sum-expression (sum)
+					(begin
+						 (interpret-Sum sum)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Disjunction
+		(lambda (disjunction-var)
+			(cases Disjunction disjunction-var
+				
+				(conjunction-disjunction (conjunction)
+					(begin
+						 (interpret-Conjunction conjunction)
+	
+					))
+
+
+				(or-disjunction (disjunction conjunction)
+					(begin
+						 (interpret-Disjunction disjunction)
+ (interpret-Conjunction conjunction)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Conjunction
+		(lambda (conjunction-var)
+			(cases Conjunction conjunction-var
+				
+				(inversion-conjunction (inversion)
+					(begin
+						 (interpret-Inversion inversion)
+	
+					))
+
+
+				(and-conjunction (conjunction inversion)
+					(begin
+						 (interpret-Conjunction conjunction)
+ (interpret-Inversion inversion)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Inversion
+		(lambda (inversion-var)
+			(cases Inversion inversion-var
+				
+				(not-inversion (inversion)
+					(begin
+						 (interpret-Inversion inversion)
+	
+					))
+
+
+				(comparison-inversion (comparison)
+					(begin
+						 (interpret-Comparison comparison)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Comparison
+		(lambda (comparison-var)
+			(cases Comparison comparison-var
+				
+				(eq-sum-comparison (eq-sum)
+					(begin
+						 (interpret-Eq-Sum eq-sum)
+	
+					))
+
+
+				(lt-sum-comparison (lt-sum)
+					(begin
+						 (interpret-Lt-Sum lt-sum)
+	
+					))
+
+
+				(gt-sum-comparison (gt-sum)
+					(begin
+						 (interpret-Gt-Sum gt-sum)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Eq-Sum
+		(lambda (eq-sum-var)
+			(cases Eq-Sum eq-sum-var
+				
+				(eq-sum (left-sum right-sum)
+					(begin
+						 (interpret-Sum left-sum)
+ (interpret-Sum right-sum)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Lt-Sum
+		(lambda (lt-sum-var)
+			(cases Lt-Sum lt-sum-var
+				
+				(lt-sum (left-sum right-sum)
+					(begin
+						 (interpret-Sum left-sum)
+ (interpret-Sum right-sum)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Gt-Sum
+		(lambda (gt-sum-var)
+			(cases Gt-Sum gt-sum-var
+				
+				(gt-sum (left-sum right-sum)
+					(begin
+						 (interpret-Sum left-sum)
+ (interpret-Sum right-sum)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Sum
+		(lambda (sum-var)
+			(cases Sum sum-var
+				
+				(addition (sum term)
+					(begin
+						 (interpret-Sum sum)
+ (interpret-Term term)
+	
+					))
+
+
+				(subtraction (sum term)
+					(begin
+						 (interpret-Sum sum)
+ (interpret-Term term)
+	
+					))
+
+
+				(term-sum (term)
+					(begin
+						 (interpret-Term term)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Term
+		(lambda (term-var)
+			(cases Term term-var
+				
+				(muliplication (term factor)
+					(begin
+						 (interpret-Term term)
+ (interpret-Factor factor)
+	
+					))
+
+
+				(division (term factor)
+					(begin
+						 (interpret-Term term)
+ (interpret-Factor factor)
+	
+					))
+
+
+				(factor-term (factor)
+					(begin
+						 (interpret-Factor factor)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Factor
+		(lambda (factor-var)
+			(cases Factor factor-var
+				
+				(plus (factor)
+					(begin
+						 (interpret-Factor factor)
+	
+					))
+
+
+				(minus (factor)
+					(begin
+						 (interpret-Factor factor)
+	
+					))
+
+
+				(power-factor (power)
+					(begin
+						 (interpret-Power power)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Power
+		(lambda (power-var)
+			(cases Power power-var
+				
+				(power (atom factor)
+					(begin
+						 (interpret-Atom atom)
+ (interpret-Factor factor)
+	
+					))
+
+
+				(primary-power (primary)
+					(begin
+						 (interpret-Primary primary)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-primary
+		(lambda (primary-var)
+			(cases primary primary-var
+				
+				(atom-primary (atom)
+					(begin
+						 (interpret-Atom atom)
+	
+					))
+
+
+				(array-ref (primary expression)
+					(begin
+						 (interpret-Primary primary)
+ (interpret-Expression expression)
+	
+					))
+
+
+				(simple-call (primary)
+					(begin
+						 (interpret-Primary primary)
+	
+					))
+
+
+				(argument-call (primary arguments)
+					(begin
+						 (interpret-Primary primary)
+ (interpret-Arguments arguments)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Arguments
+		(lambda (arguments-var)
+			(cases Arguments arguments-var
+				
+				(single-argument (expression)
+					(begin
+						 (interpret-Expression expression)
+	
+					))
+
+
+				(multiple-arguments (arguments expression)
+					(begin
+						 (interpret-Arguments arguments)
+ (interpret-Expression expression)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Atom
+		(lambda (atom-var)
+			(cases Atom atom-var
+				
+				(id-atom (id)
+					(begin
+						 (interpret-symbol id)
+	
+					))
+
+
+				(true-atom ()
+					(begin
+							
+					))
+
+
+				(false-atom ()
+					(begin
+							
+					))
+
+
+				(none-atom ()
+					(begin
+							
+					))
+
+
+				(number-atom (number)
+					(begin
+						 (interpret-number number)
+	
+					))
+
+
+				(list-atom (lis)
+					(begin
+						 (interpret-List lis)
+	
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-List
+		(lambda (list-var)
+			(cases List list-var
+				
+				(expression-list (expressions)
+					(begin
+						 (interpret-Expressions expressions)
+	
+					))
+
+
+				(empty-list ()
+					(begin
+							
+					))
+
+
+				(else )
+									 )))	
+
+
+	(define interpret-Expressions
+		(lambda (expressions-var)
+			(cases Expressions expressions-var
+				
+				(single-expression (expression)
+					(begin
+						 (interpret-Expression expression)
+	
+					))
+
+
+				(multiple-expressions (expressions expression)
+					(begin
+						 (interpret-Expressions expressions)
+ (interpret-Expression expression)
+	
+					))
+
+
+				(else )
+									 )))	
 
