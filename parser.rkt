@@ -131,5 +131,7 @@
 
 ;test
 (define lex-this (lambda (lexer input) (lambda () (lexer input))))
-(define my-lexer (lex-this lexer-imp (open-input-string "x = 1 + 2;")))
+(define in (open-input-file "input.py"))
+(define my-lexer (lex-this lexer-imp in))
 (let ((parser-res (simple-math-parser my-lexer))) parser-res)
+(close-input-port in)
