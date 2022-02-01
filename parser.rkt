@@ -6,6 +6,7 @@
          parser-tools/yacc)
 
 (require "grammar-datatypes.rkt")
+(require "interpreter.rkt")
 
 
 (define-tokens value-tokens (NUM ID BOOL))
@@ -135,5 +136,5 @@
 (define lex-this (lambda (lexer input) (lambda () (lexer input))))
 (define in (open-input-file "input.py"))
 (define my-lexer (lex-this lexer-imp in))
-(let ((parser-res (simple-math-parser my-lexer))) parser-res)
+(let ((parser-res (simple-math-parser my-lexer))) (interpret-Program parser-res))
 (close-input-port in)

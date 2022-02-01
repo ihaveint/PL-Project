@@ -3,7 +3,7 @@ import re
 
 value_of_template = """
 (define interpret-{}
-	(lambda ({})
+	(lambda ({} env)
 		(cases {} {} {}
 			(else (displayln "ooops")))))	
 """
@@ -14,7 +14,7 @@ cases_template = """
 				))"""
 
 cases_inner_template = """
-					(interpret-{} {})"""
+					(interpret-{} {} env)"""
 
 def process_subtype(l):
 	subtype = tokens[l + 1] 	
