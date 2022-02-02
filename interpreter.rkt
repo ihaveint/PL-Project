@@ -9,36 +9,45 @@
 
 ; environtment
 
-(define-datatype environment environment?
+(define-datatype Environment Environment?
   (empty-env)
   (extend-env
-   (var symbol?)
-   (val Expresed-value?)
-   (env environment?))
-  (extend-env-rec
-   (p-name symbol?)
-   (b-var (list-of symbol?))
-   (body expression?)
-   (env environment?)))
+   (id symbol?)
+   (value Expressed-Value?)
+   (env Environment?))
+	 
+;  (extend-env-rec
+;   (p-name symbol?)
+;   (b-var (list-of symbol?))
+;   (body expression?)
+;   (env Environment?))
+
+	 )
+
+; context
+
+(define (context value env)
+	(cons value env))
+
+(define (context-val context)
+	(car context))
+
+(define (context-env context)
+	(cdr context))
 
 
 ; value holders
 
 
-(define-datatype Exprssed-Value Expresed-Value?
-	(number-container
-		(num Number?))
-	(function-container
-		(function Function-Definition?)))
-
-
-(define-datatype Number Number?
+(define-datatype Expressed-Value Expressed-Value?
 	(int-number
 		(int number?))
 	(float-number
 		(float number?))
 	(bool-number
-		(bool boolean?)))
+		(bool boolean?))
+	(function-container
+		(function Function-Definition?)))
 
 
 ; interpret grammar datatypes
@@ -49,6 +58,7 @@
 		(cases Program program-var 
 			(program (statements)
 				(begin 
+					(displayln program-var)
 					(interpret-Statements statements (empty-env))
 				))
 
@@ -135,7 +145,10 @@
 		(cases Assignment assignment-var 
 			(assignment (id expression)
 				(begin 
-					(interpret-Expression expression env)	
+					(define cont (interpret-Expression expression env))
+					(define value (context-val cont))
+					(define nenv (extend-env id value (context-env cont)))
+					(context value nenv) 
 				))
 
 			(else (displayln "ooops")))))	
@@ -515,7 +528,8 @@
 
 			(number-atom (number)
 				(begin 
-					(void) 	
+					; todo: maybe create float here bases on number's representation
+					(context (int-number number) env)
 				))
 
 			(list-atom (lis)
