@@ -44,11 +44,26 @@
 		(int number?))
 	(float-number
 		(float number?))
-	(bool-number
+	(boolean
 		(bool boolean?))
 	(function-container
 		(function Function-Definition?)))
 
+
+(define (Expressed-Value->number expressed-value)
+	(cases Expressed-Value expressed-value
+		(int-number (int)
+			int)
+	(else (void))
+			))
+
+
+(define (Expressed-Value->bool expressed-value)
+	(cases Expressed-Value expressed-value
+		(boolean (bool)
+			bool)
+	(else (void))
+			))
 
 ; interpret grammar datatypes
 
@@ -145,10 +160,10 @@
 		(cases Assignment assignment-var 
 			(assignment (id expression)
 				(begin 
-					(define cont (interpret-Expression expression env))
-					(define value (context-val cont))
-					(define nenv (extend-env id value (context-env cont)))
+					(define value (interpret-Expression expression env))
+					(define nenv (extend-env id value env))
 					(context value nenv) 
+					(displayln nenv)
 				))
 
 			(else (displayln "ooops")))))	
@@ -277,8 +292,11 @@
 
 			(or-disjunction (disjunction conjunction)
 				(begin 
-					(interpret-Disjunction disjunction env)
-					(interpret-Conjunction conjunction env)	
+					(define left (interpret-Disjunction disjunction env))
+					(define right (interpret-Conjunction conjunction env))
+					(define left-bool (Expressed-Value->bool left))
+					(define right-bool (Expressed-Value->bool right))
+					(boolean (or left-bool right-bool))
 				))
 
 			(else (displayln "ooops")))))	
@@ -294,8 +312,11 @@
 
 			(and-conjunction (conjunction inversion)
 				(begin 
-					(interpret-Conjunction conjunction env)
-					(interpret-Inversion inversion env)	
+					(define left (interpret-Conjunction conjunction env))
+					(define right (interpret-Inversion inversion env))
+					(define left-bool (Expressed-Value->bool left))
+					(define right-bool (Expressed-Value->bool right))
+					(boolean (and left-bool right-bool))
 				))
 
 			(else (displayln "ooops")))))	
@@ -306,7 +327,9 @@
 		(cases Inversion inversion-var 
 			(not-inversion (inversion)
 				(begin 
-					(interpret-Inversion inversion env)	
+					(define value (interpret-Inversion inversion env))
+					(define bool-val (Expressed-Value->bool value))
+					(boolean (not bool-val))
 				))
 
 			(comparison-inversion (comparison)
@@ -343,8 +366,14 @@
 		(cases Eq-Sum eq-sum-var 
 			(eq-sum (left-sum right-sum)
 				(begin 
-					(interpret-Sum left-sum env)
-					(interpret-Sum right-sum env)	
+					(define left (interpret-Sum left-sum env))
+					(define right (interpret-Sum right-sum env))
+					(define left-num (Expressed-Value->number left))
+					(define right-num (Expressed-Value->number right))
+					(displayln left)
+					(displayln right)
+					(displayln (eq? left-num right-num))
+					(boolean (equal? left-num right-num))
 				))
 
 			(else (displayln "ooops")))))	
@@ -355,8 +384,11 @@
 		(cases Lt-Sum lt-sum-var 
 			(lt-sum (left-sum right-sum)
 				(begin 
-					(interpret-Sum left-sum env)
-					(interpret-Sum right-sum env)	
+					(define left (interpret-Sum left-sum env))
+					(define right (interpret-Sum right-sum env))
+					(define left-num (Expressed-Value->number left))
+					(define right-num (Expressed-Value->number right))
+					(boolean (< left-num right-num))
 				))
 
 			(else (displayln "ooops")))))	
@@ -367,8 +399,11 @@
 		(cases Gt-Sum gt-sum-var 
 			(gt-sum (left-sum right-sum)
 				(begin 
-					(interpret-Sum left-sum env)
-					(interpret-Sum right-sum env)	
+					(define left (interpret-Sum left-sum env))
+					(define right (interpret-Sum right-sum env))
+					(define left-num (Expressed-Value->number left))
+					(define right-num (Expressed-Value->number right))
+					(boolean (> left-num right-num))
 				))
 
 			(else (displayln "ooops")))))	
@@ -379,14 +414,20 @@
 		(cases Sum sum-var 
 			(addition (sum term)
 				(begin 
-					(interpret-Sum sum env)
-					(interpret-Term term env)	
+					(define left (interpret-Sum sum env))
+					(define right (interpret-Term term env))
+					(define left-num (Expressed-Value->number left))
+					(define right-num (Expressed-Value->number right))
+					(int-number (+ left-num right-num))
 				))
 
 			(subtraction (sum term)
 				(begin 
-					(interpret-Sum sum env)
-					(interpret-Term term env)	
+				  (define left (interpret-Sum sum env))
+				  (define right (interpret-Term term env))
+					(define left-num (Expressed-Value->number left))
+					(define right-num (Expressed-Value->number right))
+					(int-number (- left-num right-num))
 				))
 
 			(term-sum (term)
@@ -402,14 +443,20 @@
 		(cases Term term-var 
 			(muliplication (term factor)
 				(begin 
-					(interpret-Term term env)
-					(interpret-Factor factor env)	
+					(define left (interpret-Term term env))
+					(define right (interpret-Factor factor env))
+					(define left-num (Expressed-Value->number left))
+					(define right-num (Expressed-Value->number right))
+					(int-number (* left-num right-num))
 				))
 
 			(division (term factor)
 				(begin 
-					(interpret-Term term env)
-					(interpret-Factor factor env)	
+					(define left (interpret-Term term env))
+					(define right (interpret-Factor factor env))
+					(define left-num (Expressed-Value->number left))
+					(define right-num (Expressed-Value->number right))
+					(int-number (/ left-num right-num))
 				))
 
 			(factor-term (factor)
@@ -417,7 +464,7 @@
 					(interpret-Factor factor env)	
 				))
 
-			(else (displayln "ooops")))))	
+			(else (displayln "ooops")))))
 
 
 (define interpret-Factor
@@ -430,7 +477,8 @@
 
 			(minus (factor)
 				(begin 
-					(interpret-Factor factor env)	
+					(define value (interpret-Factor factor env))
+					(int-number (* -1 (Expressed-Value->number value)))
 				))
 
 			(power-factor (power)
@@ -438,7 +486,7 @@
 					(interpret-Power power env)	
 				))
 
-			(else (displayln "ooops")))))	
+			(else (displayln "ooops")))))
 
 
 (define interpret-Power
@@ -446,8 +494,11 @@
 		(cases Power power-var 
 			(power (atom factor)
 				(begin 
-					(interpret-Atom atom env)
-					(interpret-Factor factor env)	
+					(define base (interpret-Atom atom env))
+					(define pow (interpret-Factor factor env))
+					(define base-num (Expressed-Value->number base))
+					(define pow-num (Expressed-Value->number pow))
+					(int-number (expt base-num pow-num))
 				))
 
 			(primary-power (primary)
@@ -513,12 +564,12 @@
 
 			(true-atom ()
 				(begin 
-					(void) 	
+					(boolean #t)
 				))
 
 			(false-atom ()
 				(begin 
-					(void) 	
+					(boolean #f)
 				))
 
 			(none-atom ()
@@ -529,7 +580,7 @@
 			(number-atom (number)
 				(begin 
 					; todo: maybe create float here bases on number's representation
-					(context (int-number number) env)
+					(int-number number)
 				))
 
 			(list-atom (lis)
