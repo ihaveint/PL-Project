@@ -21,8 +21,20 @@
 ;   (b-var (list-of symbol?))
 ;   (body expression?)
 ;   (env Environment?))
-
 	 )
+
+
+
+(define apply-env
+ (lambda (env search-var)
+	(cases Environment env
+	 (empty-env ()
+		(report-error "apply-env called on empty env"))
+	 (extend-env (saved-var saved-val saved-env)
+		(if (eqv? saved-var search-var)
+		 saved-val
+		 (apply-env saved-env search-var)))
+	 )))
 
 ; context
 
@@ -56,7 +68,7 @@
 	(cases Expressed-Value expressed-value
 		(int-number (int)
 			int)
-	(else (report-error))
+	(else (report-error "Expressed-Value->Number called on non number"))
 			))
 
 
@@ -67,11 +79,9 @@
 	(else (void))
 			))
 
-
-
-(define (report-error)
-		(eopl:error "error "))
-		
+(define report-error
+	(lambda (err)
+		(eopl:error "Error: ~s" err)))
 
 ; interpret grammar datatypes
 
@@ -98,8 +108,9 @@
 
 			(multiple-statements (statements statement)
 				(begin 
-					(interpret-Statements statements env)
-					(interpret-Statement statement env)	
+					(define nenv (interpret-Statements statements env))
+					(displayln "end")
+					(interpret-Statement statement nenv)	
 				))
 
 			(else (displayln "ooops")))))	
@@ -170,7 +181,7 @@
 				(begin 
 					(define value (interpret-Expression expression env))
 					(define nenv (extend-env id value env))
-					(context value nenv) 
+					nenv 
 				))
 
 			(else (displayln "ooops")))))	
@@ -563,7 +574,7 @@
 		(cases Atom atom-var 
 			(id-atom (id)
 				(begin 
-					(void) 	
+					(apply-env env id)
 				))
 
 			(true-atom ()
