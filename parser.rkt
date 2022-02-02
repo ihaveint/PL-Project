@@ -44,7 +44,7 @@
    ["for" (token-for)]
    ["in" (token-in)]
    ["()" (token-EMPTY_PARAMS)]
-   ["[" (token-rBracket)]
+   ["]" (token-rBracket)]
    [")" (token-rParen)]
    ["[" (token-lBracket)]
    ["(" (token-lParen)]
