@@ -46,8 +46,6 @@
 		(float number?))
 	(boolean
 		(bool boolean?))
-        (list-con
-                 (lis list?))
 	(function-container
 		(function Function-Definition?)))
 
@@ -165,6 +163,7 @@
 					(define value (interpret-Expression expression env))
 					(define nenv (extend-env id value env))
 					(context value nenv) 
+					(displayln nenv)
 				))
 
 			(else (displayln "ooops")))))	
@@ -597,12 +596,12 @@
 		(cases List list-var 
 			(expression-list (expressions)
 				(begin 
-					(list-con (interpret-Expressions expressions env))	
+					(interpret-Expressions expressions env)	
 				))
 
 			(empty-list ()
 				(begin 
-					(list-con '()) 	
+					(void) 	
 				))
 
 			(else (displayln "ooops")))))	
@@ -613,13 +612,13 @@
 		(cases Expressions expressions-var 
 			(single-expression (expression)
 				(begin 
-					(cons (interpret-Expression expression env) '())
+					(interpret-Expression expression env)	
 				))
 
 			(multiple-expressions (expressions expression)
 				(begin 
-					(append (interpret-Expressions expressions env)
-					(cons (interpret-Expression expression env) '()))	
+					(interpret-Expressions expressions env)
+					(interpret-Expression expression env)	
 				))
 
 			(else (displayln "ooops")))))	
