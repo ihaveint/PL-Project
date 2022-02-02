@@ -54,7 +54,7 @@
 	(cases Expressed-Value expressed-value
 		(int-number (int)
 			int)
-	(else (void))
+	(else (report-error))
 			))
 
 
@@ -64,6 +64,12 @@
 			bool)
 	(else (void))
 			))
+
+
+
+(define (report-error)
+		(eopl:error "error "))
+		
 
 ; interpret grammar datatypes
 
@@ -370,9 +376,6 @@
 					(define right (interpret-Sum right-sum env))
 					(define left-num (Expressed-Value->number left))
 					(define right-num (Expressed-Value->number right))
-					(displayln left)
-					(displayln right)
-					(displayln (eq? left-num right-num))
 					(boolean (equal? left-num right-num))
 				))
 
