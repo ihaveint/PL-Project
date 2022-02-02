@@ -109,7 +109,6 @@
 			(multiple-statements (statements statement)
 				(begin 
 					(define nenv (interpret-Statements statements env))
-					(displayln "end")
 					(interpret-Statement statement nenv)	
 				))
 
@@ -253,9 +252,11 @@
 		(cases If-Statement if-statement-var 
 			(if-statement (if-expression if-body else-body)
 				(begin 
-					(interpret-Expression if-expression env)
-					(interpret-Statements if-body env)
-					(interpret-Else-Block else-body env)	
+					(define val (interpret-Expression if-expression env))
+					(define value (Expressed-Value->bool val))
+					(if value
+						(interpret-Statements if-body env)
+						(interpret-Else-Block else-body env))
 				))
 
 			(else (displayln "ooops")))))	
