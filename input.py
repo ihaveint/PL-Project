@@ -6,3 +6,11 @@ if False:
 else:
 	a = 5;
 ;
+
+
+
+def cc():
+    return 10;
+;
+
+a = cc();

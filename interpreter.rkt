@@ -16,11 +16,10 @@
    (value Expressed-Value?)
    (env Environment?))
 	 
-;  (extend-env-rec
-;   (p-name symbol?)
-;   (b-var (list-of symbol?))
-;   (body expression?)
-;   (env Environment?))
+  (extend-env-rec
+   (id symbol?)
+   (func Function?)
+   (env Environment?))
 	 )
 
 
@@ -34,19 +33,11 @@
 		(if (eqv? saved-var search-var)
 		 saved-val
 		 (apply-env saved-env search-var)))
+   (extend-env-rec (id func saved-env)
+		(if (eqv? search-var id)
+		 func
+		 (apply-env saved-env search-var)))
 	 )))
-
-; context
-
-(define (context value env)
-	(cons value env))
-
-(define (context-val context)
-	(car context))
-
-(define (context-env context)
-	(cdr context))
-
 
 ; value holders
 
@@ -57,11 +48,11 @@
 	(float-number
 		(float number?))
 	(boolean
-		(bool boolean?))
-        (list-con
-                 (lis list?))
-	(function-container
-		(function Function-Definition?)))
+	 (bool boolean?))
+	(list-con
+	 (lis list?))
+	(function-expression
+		(f Function?)))
 
 
 (define (Expressed-Value->number expressed-value)
@@ -76,12 +67,30 @@
 	(cases Expressed-Value expressed-value
 		(boolean (bool)
 			bool)
-	(else (void))
+	(else (report-error "Expressed-Value->bool called on non bool"))
 			))
+
+(define (Expressed-Value->function expressed-value)
+	(cases Expressed-Value expressed-value
+		(function-expression (f)
+			f)
+	(else (report-error "Expressed-Value->function called on non function"))
+			))
+
 
 (define report-error
 	(lambda (err)
 		(eopl:error "Error: ~s" err)))
+
+
+(define-datatype Function Function?
+	(function
+		(params (lambda (x) (or (empty? x) (Params? x))))
+		(body Statements?)
+		(env Environment?)))
+
+
+
 
 ; interpret grammar datatypes
 
@@ -179,8 +188,7 @@
 			(assignment (id expression)
 				(begin 
 					(define value (interpret-Expression expression env))
-					(define nenv (extend-env id value env))
-					nenv 
+					(extend-env id value env)
 				))
 
 			(else (displayln "ooops")))))	
@@ -207,13 +215,12 @@
 		(cases Function-Definition function-definition-var 
 			(function-with-params (id params statements)
 				(begin 
-					(interpret-Params params env)
-					(interpret-Statements statements env)	
+					(extend-env-rec id (function params statements env) env)
 				))
 
 			(function-with-no-param (id statements)
 				(begin 
-					(interpret-Statements statements env)	
+					(extend-env-rec id (function empty statements env) env)
 				))
 
 			(else (displayln "ooops")))))	
@@ -224,13 +231,13 @@
 		(cases Params params-var 
 			(single-param (param)
 				(begin 
-					(interpret-Param param env)	
+					(interpret-Param param env)
 				))
 
 			(multiple-params (params param)
 				(begin 
-					(interpret-Params params env)
-					(interpret-Param param env)	
+					(define nenv (interpret-Params params env))
+					(interpret-Param param nenv)
 				))
 
 			(else (displayln "ooops")))))	
@@ -241,7 +248,7 @@
 		(cases Param param-var 
 			(param (id default-value)
 				(begin 
-					(interpret-Expression default-value env)	
+					(interpret-Expression default-value env)
 				))
 
 			(else (displayln "ooops")))))	
@@ -533,15 +540,17 @@
 					(interpret-Atom atom env)	
 				))
 
-			(array-ref (primary expression)
-				(begin 
+			(array-ref (primary expression) (begin 
 					(interpret-Primary primary env)
 					(interpret-Expression expression env)	
 				))
 
 			(simple-call (primary)
 				(begin 
-					(interpret-Primary primary env)	
+					(displayln "starting simple call")
+					(define func (interpret-Primary primary env))
+					(displayln func)
+					(displayln "done simple call")
 				))
 
 			(argument-call (primary arguments)

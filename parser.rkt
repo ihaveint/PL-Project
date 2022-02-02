@@ -43,7 +43,7 @@
    ["else" (token-else)]
    ["for" (token-for)]
    ["in" (token-in)]
-   ["()" (token-EMPTY_PARAMS)]
+;   ["()" (token-EMPTY_PARAMS)]
    ["]" (token-rBracket)]
    [")" (token-rParen)]
    ["[" (token-lBracket)]
@@ -82,7 +82,7 @@
     (Return_stmt ((return) (simple-return))
                  ((return Expression) (expression-return $2)))
     (Function_def ((def ID lParen Params rParen colon Statements) (function-with-params $2 $4 $7))
-                  ((def ID EMPTY_PARAMS colon Statements) (function-with-no-param $2 $5)))
+                  ((def ID lParen rParen colon Statements) (function-with-no-param $2 $6)))
     (Params ((Param_with_default) (single-param $1))
                   ((Params comma Param_with_default) (multiple-params $1 $3)))
     (Param_with_default ((ID equal Expression) (param $1 $3)))
