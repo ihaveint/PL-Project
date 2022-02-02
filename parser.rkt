@@ -112,7 +112,7 @@
     (Factor ((plus Factor) (plus $2))
                   ((minus Factor) (minus $2))
                   ((Power) (power-factor $1)))
-    (Power ((Atom Power Factor) (power $1 $3))
+    (Power ((Atom power Factor) (power $1 $3))
                   ((Primary) (primary-power $1)))
     (Primary ((Atom) (atom-primary $1))
                   ((Primary lBracket Expression rBracket) (array-ref $1 $3))
