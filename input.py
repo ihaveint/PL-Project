@@ -13,4 +13,4 @@ def cc():
     return 10;
 ;
 
-a = cc();
+x = cc();

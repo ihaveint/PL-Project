@@ -20,9 +20,10 @@
    (id symbol?)
    (func Function?)
    (env Environment?))
+	(extend-env-func-answer
+		(result Expressed-Value?)
+		(env Environment?))
 	 )
-
-
 
 (define apply-env
  (lambda (env search-var)
@@ -37,7 +38,23 @@
 		(if (eqv? search-var id)
 		 func
 		 (apply-env saved-env search-var)))
+	 (extend-env-func-answer (result saved-env)
+	 	(apply-env saved-env search-var))
 	 )))
+
+(define get-function-res
+ (lambda (env search-var)
+	(cases Environment env
+	 (empty-env ()
+		(report-error "get-function-res called on empty env"))
+	 (extend-env (saved-var saved-val saved-env)
+		 (apply-env saved-env search-var))
+   (extend-env-rec (id func saved-env)
+		 (apply-env saved-env search-var))
+	 (extend-env-func-answer (result saved-env)
+			result)
+	 )))
+
 
 ; value holders
 
@@ -84,12 +101,15 @@
 
 
 (define-datatype Function Function?
-	(function
-		(params (lambda (x) (or (empty? x) (Params? x))))
+	(func-with-params
+		(id symbol?)
+		(params Params?)
+		(body Statements?)
+		(env Environment?))
+	(func-with-no-params
+		(id symbol?)
 		(body Statements?)
 		(env Environment?)))
-
-
 
 
 ; interpret grammar datatypes
@@ -150,6 +170,7 @@
 
 			(return-simple-statement (return-statement)
 				(begin 
+					(displayln "oh yeah!")
 					(interpret-Return-Statement return-statement env)	
 				))
 
@@ -204,7 +225,8 @@
 
 			(expression-return (expression)
 				(begin 
-					(interpret-Expression expression env)	
+					(define value (interpret-Expression expression env))
+					(extend-env-func-answer value env)
 				))
 
 			(else (displayln "ooops")))))	
@@ -215,28 +237,29 @@
 		(cases Function-Definition function-definition-var 
 			(function-with-params (id params statements)
 				(begin 
-					(extend-env-rec id (function params statements env) env)
+					(extend-env-rec id (function-with-params id params statements env) env)
 				))
 
 			(function-with-no-param (id statements)
 				(begin 
-					(extend-env-rec id (function empty statements env) env)
+					(extend-env-rec id (func-with-no-params id statements env) env)
 				))
 
 			(else (displayln "ooops")))))	
 
 
 (define interpret-Params
-	(lambda (params-var env)
+	(lambda (params-var given-vals env)
 		(cases Params params-var 
 			(single-param (param)
 				(begin 
-					(interpret-Param param env)
+					(interpret-Param param (first given-vals) env)
 				))
 
 			(multiple-params (params param)
 				(begin 
-					(define nenv (interpret-Params params env))
+					(define all-but-last (reverse (rest (reverse given-vals))))
+					(define nenv (interpret-Params params all-but-last env))
 					(interpret-Param param nenv)
 				))
 
@@ -244,11 +267,12 @@
 
 
 (define interpret-Param
-	(lambda (param-var env)
+	(lambda (param-var given-val env)
 		(cases Param param-var 
 			(param (id default-value)
 				(begin 
-					(interpret-Expression default-value env)
+					(define val (interpret-Expression default-value env))
+					(extend-env id val env)
 				))
 
 			(else (displayln "ooops")))))	
@@ -547,33 +571,56 @@
 
 			(simple-call (primary)
 				(begin 
-					(displayln "starting simple call")
 					(define func (interpret-Primary primary env))
-					(displayln func)
-					(displayln "done simple call")
+					(define res (call-function func empty))
+					res
 				))
 
 			(argument-call (primary arguments)
 				(begin 
-					(interpret-Primary primary env)
-					(interpret-Arguments arguments env)	
+					(define func (interpret-Primary primary env))
+					
+					; handle print here of func is print!
+					
+					(define argument-values (interpret-Arguments arguments env))
+					(call-function func argument-values)
 				))
 
 			(else (displayln "ooops")))))	
 
+
+(define call-function
+	(lambda (func argument-values)
+		(cases Function func
+			(func-with-params (id params body env)
+				(begin
+					(define nenv (interpret-Params params argument-values env))
+					(define ret-env (interpret-Statements body nenv))
+					(get-function-res ret-env id)
+				))
+			 (func-with-no-params (id body env)
+			 	(begin
+					(define ret-env (interpret-Statements body env))
+					(define sss (get-function-res ret-env id))
+					sss
+				))
+			(else (displayln "oops"))
+			)))
+				
+				
 
 (define interpret-Arguments
 	(lambda (arguments-var env)
 		(cases Arguments arguments-var 
 			(single-argument (expression)
 				(begin 
-					(interpret-Expression expression env)	
+					(list (interpret-Expression expression env))
 				))
 
 			(multiple-arguments (arguments expression)
 				(begin 
-					(interpret-Arguments arguments env)
-					(interpret-Expression expression env)	
+					(append (interpret-Arguments arguments env)
+						(list (interpret-Expression expression env)))
 				))
 
 			(else (displayln "ooops")))))	
