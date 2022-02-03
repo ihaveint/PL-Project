@@ -590,8 +590,8 @@
 				))
 
 			(array-ref (primary expression) (begin 
-					(interpret-Primary primary env)
-					(interpret-Expression expression env)	
+					(define arr (Expressed-Value->lst (interpret-Primary primary env)))
+					(list-ref arr (Expressed-Value->number (interpret-Expression expression env)))	
 				))
 
 			(simple-call (primary)
