@@ -79,6 +79,12 @@
 	(else (void))
 			))
 
+(define (Expressed-Value->lst expressed-value)
+	(cases Expressed-Value expressed-value
+	       (list-con (ls) ls)
+	       (else (report-error "Expressed-Value->lst called on non list type"))
+ 		))
+
 (define report-error
 	(lambda (err)
 		(eopl:error "Error: ~s" err)))
@@ -432,9 +438,18 @@
 				(begin 
 					(define left (interpret-Sum sum env))
 					(define right (interpret-Term term env))
-					(define left-num (Expressed-Value->number left))
-					(define right-num (Expressed-Value->number right))
-					(int-number (+ left-num right-num))
+					(cases Expressed-Value left
+						(int-number (lf)
+							(define right-num (Expressed-Value->number right))
+							(int-number (+ lf right-num)))
+						(float-number (lf)
+							(define right-num (Expressed-Value->number right))
+						 	(float-number (+ lf right-num)))
+						(list-con (lf)
+							(define right-ls (Expressed-Value->lst right))
+							(list-con (append lf right-ls)))
+						(else (displayln "oops"))
+					)
 				))
 
 			(subtraction (sum term)
