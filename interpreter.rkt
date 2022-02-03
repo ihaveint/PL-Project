@@ -252,31 +252,42 @@
 
 			(else (displayln "ooops")))))	
 
+(define param-number 
+  (lambda (params-var)
+    (cases Params params-var
+	   (single-param (param) 1)
+	   (multiple-params (params param) (+ 1 (param-number params)))
+	   (else (displayln "oops"))
+  )))
 
 (define interpret-Params
 	(lambda (params-var given-vals env)
+	  (begin (define par-num (param-number params-var))
 		(cases Params params-var 
 			(single-param (param)
 				(begin 
-					(interpret-Param param (first given-vals) env)
+					(interpret-Param param (first given-vals) env given-vals)
 				))
 
 			(multiple-params (params param)
-				(begin 
-					(define all-but-last (reverse (rest (reverse given-vals))))
-					(define nenv (interpret-Params params all-but-last env))
-					(interpret-Param param nenv)
-				))
-
-			(else (displayln "ooops")))))	
+				(if (> par-num (length given-vals)) 
+				(interpret-Param param 0 
+					(interpret-Params params given-vals env) #t)
+				(interpret-Param param (first (reverse given-vals)) 
+					(interpret-Params params (reverse (rest (reverse given-vals))) env) #f))
+				)
+			(else (report-error "!!!"))
+			))))	
 
 
 (define interpret-Param
-	(lambda (param-var given-val env)
+	(lambda (param-var given-val env def)
 		(cases Param param-var 
 			(param (id default-value)
 				(begin 
-					(define val (interpret-Expression default-value env))
+					(define val (interpret-Expression 
+						      (if def default-value given-val) 
+						      env))
 					(extend-env id val env)
 				))
 
