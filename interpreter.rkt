@@ -272,9 +272,9 @@
 			(multiple-params (params param)
 				(if (> par-num (length given-vals)) 
 				(interpret-Param param 0 
-					(interpret-Params params given-vals env) #t)
+					(interpret-Params params given-vals env) #f)
 				(interpret-Param param (first (reverse given-vals)) 
-					(interpret-Params params (reverse (rest (reverse given-vals))) env) #f))
+					(interpret-Params params (reverse (rest (reverse given-vals))) env) #t))
 				)
 			(else (report-error "!!!"))
 			))))	
@@ -285,9 +285,9 @@
 		(cases Param param-var 
 			(param (id default-value)
 				(begin 
-					(define val (interpret-Expression 
-						      (if def default-value given-val) 
-						      env))
+					(define val (if def given-val 
+						      (interpret-Expression default-value env) 
+						     ))
 					(extend-env id val env)
 				))
 
