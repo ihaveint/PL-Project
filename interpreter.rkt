@@ -242,7 +242,7 @@
 		(cases Function-Definition function-definition-var 
 			(function-with-params (id params statements)
 				(begin 
-					(extend-env-rec id (function-with-params id params statements env) env)
+					(extend-env-rec id (func-with-params id params statements env) env)
 				))
 
 			(function-with-no-param (id statements)
