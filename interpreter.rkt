@@ -120,6 +120,70 @@
 
 ; interpret grammar datatypes
 
+(define interpret-Program-
+	(lambda (program-var)
+		(cases Program program-var 
+			(program (statements)
+				(begin 
+					(interpret-Statements- statements (empty-env))
+				))
+
+			(else (displayln "ooops")))))	
+
+
+(define interpret-Statements-
+	(lambda (statements-var env)
+		(cases Statements statements-var 
+			(single-statement (statement)
+				(begin 
+					(interpret-Statement- statement env)	
+				))
+
+			(multiple-statements (statements statement)
+				(begin 
+					(define nenv (interpret-Statements- statements env)) 
+					(interpret-Statement- statement nenv))	
+				))
+
+			(else (displayln "ooops")))))	
+
+
+(define interpret-Statement-
+	(lambda (statement-var env)
+		(cases Statement statement-var 
+			(compound-statement-statement (compound-statement)
+				(begin 
+					(interpret-Compound-Statement- compound-statement env)	
+				))
+
+			(else env))))	
+
+
+(define interpret-Compound-Statement-
+	(lambda (compound-statement-var env)
+		(cases Compound-Statement compound-statement-var 
+			(function-definition-compound-statement (function-definition)
+				(begin 
+					(interpret-Function-Definition- function-definition env)	
+				))
+
+			(else env))))	
+
+(define interpret-Function-Definition-
+	(lambda (function-definition-var env)
+		(cases Function-Definition function-definition-var 
+			(function-with-params (id params statements)
+				(begin 
+					(extend-env-rec id (func-with-params id params statements env))
+				))
+
+			(function-with-no-param (id statements)
+				(begin 
+					(extend-env-rec id (func-with-no-params id statements env))
+				))
+
+			(else (displayln "ooops")))))	
+
 
 (define interpret-Program
 	(lambda (program-var)
