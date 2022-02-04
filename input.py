@@ -1,5 +1,4 @@
-a = 0;
-for i in [1,3,2]:
-    pass;;
-b = a;
+def x(i = 1): 
+    i = 2;;
+a = x();
 

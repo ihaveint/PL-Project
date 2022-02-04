@@ -46,11 +46,11 @@
  (lambda (env search-var)
 	(cases Environment env
 	 (empty-env ()
-		(report-error "get-function-res called on empty env"))
+		(none-type '()))
 	 (extend-env (saved-var saved-val saved-env)
-		 (apply-env saved-env search-var))
+		 (get-function-res saved-env search-var))
    (extend-env-rec (id func saved-env)
-		 (apply-env saved-env search-var))
+		 (get-function-res saved-env search-var))
 	 (extend-env-func-answer (result saved-env)
 			result)
 	 )))
@@ -68,6 +68,7 @@
 	 (bool boolean?))
 	(list-con
 	 (lis list?))
+	(none-type (non null?))
 	(function-expression
 		(f Function?)))
 
@@ -267,28 +268,27 @@
 		(cases Params params-var 
 			(single-param (param)
 				(begin 
-					(interpret-Param param (first given-vals) env given-vals)
+					(interpret-Param param given-vals env)
 				))
 
 			(multiple-params (params param)
 				(if (> par-num (length given-vals)) 
-				(interpret-Param param 0 
-					(interpret-Params params given-vals env) #f)
-				(interpret-Param param (first (reverse given-vals)) 
-					(interpret-Params params (reverse (rest (reverse given-vals))) env) #t))
+				(interpret-Param param '() 
+					(interpret-Params params given-vals env))
+				(interpret-Param param (list (first (reverse given-vals))) 
+					(interpret-Params params (reverse (rest (reverse given-vals))) env)))
 				)
 			(else (report-error "!!!"))
 			))))	
 
 
 (define interpret-Param
-	(lambda (param-var given-val env def)
+	(lambda (param-var given-val env)
 		(cases Param param-var 
 			(param (id default-value)
-				(begin 
-					(define val (if def given-val 
-						      (interpret-Expression default-value env) 
-						     ))
+				(begin
+					(define val (if (null? given-val) (interpret-Expression default-value env) 
+						     (car given-val)))
 					(extend-env id val env)
 				))
 
