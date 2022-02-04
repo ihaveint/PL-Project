@@ -28,6 +28,8 @@
         (assignment Assignment?))
     (return-simple-statement
         (return-statement Return-Statement?))
+    (print-simple-statement
+      	(print-statemnt Print-Statement?))
     (pass-simple-statement))
 
 (define-datatype Compound-Statement Compound-Statement?
@@ -47,6 +49,9 @@
 	(simple-return)
 	(expression-return
 		(expression Expression?)))
+
+(define-datatype Print-Statement Print-Statement?
+		(print-stmt (arguments Arguments?)))
 
 (define-datatype Function-Definition Function-Definition?
 	(function-with-params

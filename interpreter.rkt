@@ -245,6 +245,9 @@
 				(begin 
 					(interpret-Return-Statement return-statement env)	
 				))
+			(print-simple-statement (print-stmt)
+				(interpret-Print-Statement print-stmt env)
+			 )
 
 			(pass-simple-statement ()
 				(begin 
@@ -285,6 +288,40 @@
 				))
 
 			(else (displayln "ooops")))))	
+
+(define interpret-Print-Statement
+	(lambda (stmt env)
+	  	(cases Print-Statement stmt
+		      (print-stmt (args)
+ 			(begin 
+		  	(print-handler (interpret-Arguments args env))
+		 	(list env #f))))))
+
+(define Expressed-Value->printable 
+(lambda (inp)
+	      (cases Expressed-Value inp
+		(int-number (num) num)
+		(float-number (num) num)
+		(boolean (bool) bool)
+		(none-type (non) "None")
+		(list-con (lis) (begin
+				 (define fr (Expressed-Value->printable (car lis)))
+				 (if (null? (cdr lis)) (list fr)
+				   (cons fr (Expressed-Value->printable (list-con (cdr lis))))
+				   )
+				 ))
+		    (else (displayln "Error"))
+		     
+		     )
+  ))
+
+(define print-handler
+  (lambda (ls)
+  (begin
+    (displayln (Expressed-Value->printable (car ls)))
+   (if (null? (cdr ls)) '() (print-handler (cdr ls)))
+   )
+  ))
 
 
 (define interpret-Return-Statement

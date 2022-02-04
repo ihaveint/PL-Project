@@ -11,7 +11,7 @@
 
 (define-tokens value-tokens (NUM ID BOOL))
 (define-empty-tokens op-tokens (EOF plus comma lBracket rBracket lParen rParen power minus division mult greater 
-                            less equal not and or for in colon else double_equal def EMPTY_PARAMS return pass semicolon NONE if True False))
+                            less equal not and or for in colon else double_equal def EMPTY_PARAMS return pass print semicolon NONE if True False))
 
 (define-lex-abbrevs
  (digit (:/ "0" "9"))
@@ -54,6 +54,7 @@
    ["def" (token-def)]
    ["return" (token-return)]
    ["pass" (token-pass)]
+   ["print" (token-print)]
    [(:: (:+ char))
     (token-ID (string->symbol lexeme))]
    
@@ -74,10 +75,12 @@
                 ((Simple_stmt) (simple-statement-statement $1)))
     (Simple_stmt ((Assignment) (assignment-simple-statement $1))
                  ((Return_stmt) (return-simple-statement $1))
+		 ((Print-stmt) (print-simple-statement $1))
                  ((pass) (pass-simple-statement)))
     (Compound_stmts ((Function_def) (function-definition-compound-statement $1))
                     ((If_stmt) (if-compound-statment $1))
                     ((For_stmt) (for-statement-compound-statement $1)))
+    (Print-stmt  ((print lParen Arguments rParen) (print-stmt $3)))
     (Assignment ((ID equal Expression) (assignment $1 $3)))
     (Return_stmt ((return) (simple-return))
                  ((return Expression) (expression-return $2)))
