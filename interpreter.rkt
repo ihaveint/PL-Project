@@ -194,6 +194,7 @@
 			(program (statements)
 				(begin 
 					(interpret-Statements statements func-env)
+					(displayln "finished")
 				))
 
 			(else (displayln "ooops"))))))	
