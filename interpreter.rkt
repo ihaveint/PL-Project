@@ -143,7 +143,8 @@
 			(multiple-statements (statements statement)
 				(begin 
 					(define nenv (interpret-Statements statements env))
-					(interpret-Statement statement nenv)	
+					(if (cadr nenv) nenv 
+					  (interpret-Statement statement (car nenv)))	
 				))
 
 			(else (displayln "ooops")))))	
@@ -181,7 +182,7 @@
 
 			(pass-simple-statement ()
 				(begin 
-					(void) 	
+					(list env #f) 	
 				))
 
 			(else (displayln "ooops")))))	
@@ -214,7 +215,7 @@
 			(assignment (id expression)
 				(begin 
 					(define value (interpret-Expression expression env))
-					(extend-env id value env)
+					(list (extend-env id value env) #f)
 				))
 
 			(else (displayln "ooops")))))	
@@ -225,13 +226,13 @@
 		(cases Return-Statement return-statement-var 
 			(simple-return ()
 				(begin 
-					(void) 	
+					(list env #t) 	
 				))
 
 			(expression-return (expression)
 				(begin 
 					(define value (interpret-Expression expression env))
-					(extend-env-func-answer value env)
+					(list (extend-env-func-answer value env) #t)
 				))
 
 			(else (displayln "ooops")))))	
@@ -242,12 +243,12 @@
 		(cases Function-Definition function-definition-var 
 			(function-with-params (id params statements)
 				(begin 
-					(extend-env-rec id (func-with-params id params statements env) env)
+					(list (extend-env-rec id (func-with-params id params statements env) env) #f)
 				))
 
 			(function-with-no-param (id statements)
 				(begin 
-					(extend-env-rec id (func-with-no-params id statements env) env)
+					(list (extend-env-rec id (func-with-no-params id statements env) env) #f)
 				))
 
 			(else (displayln "ooops")))))	
@@ -320,13 +321,26 @@
 			(else (displayln "ooops")))))	
 
 
+(define for-handler
+	(lambda (id ls statements env)
+	  (begin
+	     (define nenv (interpret-Statements statements (extend-env id (car ls) env)))
+	     (if (or (cadr nenv) (null? (cdr ls))) nenv
+	       (for-handler id (cdr ls) statements (car nenv)) 
+	       )
+	    )
+	  ))
+
 (define interpret-For-Statement
 	(lambda (for-statement-var env)
 		(cases For-Statement for-statement-var 
 			(for (id expression statements)
 				(begin 
-					(interpret-Expression expression env)
-					(interpret-Statements statements env)	
+					(define ls (Expressed-Value->lst (interpret-Expression expression env)))
+					( if ls
+					(for-handler id ls statements env)
+					(list env #f)
+					)
 				))
 
 			(else (displayln "ooops")))))	
@@ -621,12 +635,12 @@
 				(begin
 					(define nenv (interpret-Params params argument-values env))
 					(define ret-env (interpret-Statements body nenv))
-					(get-function-res ret-env id)
+					(get-function-res (car ret-env) id)
 				))
 			 (func-with-no-params (id body env)
 			 	(begin
 					(define ret-env (interpret-Statements body env))
-					(define sss (get-function-res ret-env id))
+					(define sss (get-function-res (car ret-env) id))
 					sss
 				))
 			(else (displayln "oops"))
