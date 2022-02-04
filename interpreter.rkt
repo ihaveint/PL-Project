@@ -120,6 +120,8 @@
 
 ; interpret grammar datatypes
 
+(define func-env (empty-env))
+
 (define interpret-Program-
 	(lambda (program-var)
 		(cases Program program-var 
@@ -143,7 +145,7 @@
 				(begin 
 					(define nenv (interpret-Statements- statements env)) 
 					(interpret-Statement- statement nenv))	
-				))
+				)
 
 			(else (displayln "ooops")))))	
 
@@ -174,12 +176,12 @@
 		(cases Function-Definition function-definition-var 
 			(function-with-params (id params statements)
 				(begin 
-					(extend-env-rec id (func-with-params id params statements env))
+					(set! func-env (extend-env-rec id (func-with-params id params statements (empty-env)) env))
 				))
 
 			(function-with-no-param (id statements)
 				(begin 
-					(extend-env-rec id (func-with-no-params id statements env))
+					(set! func-env (extend-env-rec id (func-with-no-params id statements (empty-env)) env))
 				))
 
 			(else (displayln "ooops")))))	
@@ -187,14 +189,14 @@
 
 (define interpret-Program
 	(lambda (program-var)
+	  	(begin (interpret-Program- program-var)
 		(cases Program program-var 
 			(program (statements)
 				(begin 
-					(displayln program-var)
-					(interpret-Statements statements (empty-env))
+					(interpret-Statements statements func-env)
 				))
 
-			(else (displayln "ooops")))))	
+			(else (displayln "ooops"))))))	
 
 
 (define interpret-Statements
@@ -241,7 +243,6 @@
 
 			(return-simple-statement (return-statement)
 				(begin 
-					(displayln "oh yeah!")
 					(interpret-Return-Statement return-statement env)	
 				))
 
@@ -308,12 +309,12 @@
 		(cases Function-Definition function-definition-var 
 			(function-with-params (id params statements)
 				(begin 
-					(list (extend-env-rec id (func-with-params id params statements env) env) #f)
+					(list env #f)
 				))
 
 			(function-with-no-param (id statements)
 				(begin 
-					(list (extend-env-rec id (func-with-no-params id statements env) env) #f)
+					(list env #f)
 				))
 
 			(else (displayln "ooops")))))	
@@ -697,13 +698,13 @@
 		(cases Function func
 			(func-with-params (id params body env)
 				(begin
-					(define nenv (interpret-Params params argument-values env))
+					(define nenv (interpret-Params params argument-values func-env))
 					(define ret-env (interpret-Statements body nenv))
 					(get-function-res (car ret-env) id)
 				))
 			 (func-with-no-params (id body env)
 			 	(begin
-					(define ret-env (interpret-Statements body env))
+					(define ret-env (interpret-Statements body func-env))
 					(define sss (get-function-res (car ret-env) id))
 					sss
 				))
