@@ -1,26 +1,29 @@
-def x(l=[1,5,8,9], lt=[2,4,7,10]):
-    i = 0;
-    ret = [];
-    for t in [0,1,2,3,4,5,6,7]:
-        if i == 4:
-            ret = ret + [lt[t-i]];
-        else:
-            if t-i == 4:
-                ret = ret + [l[i]];
-                i = i + 1;
-            else:
-                if l[i] < lt[t-i]:
-                    ret = ret + [l[i]];
-                    i = i + 1;
-                else:
-                    ret = ret + [lt[t-i]];
-                ;
+def f(n = 0):
+        a = n;
+            b = n + 1;
+                return a ** b;
             ;
-        ;
-    ;
-    return ret;
-;
 
+            def g():
+                    c = 1 < 7 and 13 > 17 or 1 == 1;
+                        print(c);
+                            return c;
+                        ;
 
-print(x(), x([1,2,3,4]), x([2,4,6,8], [1,3,5,7]));
+                        l = [1, 3, 5, 7];
 
+                        if g():
+                                h = f;
+                                    d = h(3);
+                                        print(d);
+                                    else:
+                                            print(0);
+                                            ;
+
+                                            x = 0;
+                                            if False:
+                                                    x = l[2];
+                                                else:
+                                                        x = l[3];
+                                                        ;
+                                                        print(x);

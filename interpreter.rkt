@@ -18,7 +18,7 @@
 	 
   (extend-env-rec
    (id symbol?)
-   (func Function?)
+   (func Expressed-Value?)
    (env Environment?))
 	(extend-env-func-answer
 		(result Expressed-Value?)
@@ -176,12 +176,12 @@
 		(cases Function-Definition function-definition-var 
 			(function-with-params (id params statements)
 				(begin 
-					(set! func-env (extend-env-rec id (func-with-params id params statements (empty-env)) env))
+					(set! func-env (extend-env-rec id (function-expression (func-with-params id params statements (empty-env))) func-env))
 				))
 
 			(function-with-no-param (id statements)
 				(begin 
-					(set! func-env (extend-env-rec id (func-with-no-params id statements (empty-env)) env))
+					(set! func-env (extend-env-rec id (function-expression (func-with-no-params id statements (empty-env))) func-env))
 				))
 
 			(else (displayln "ooops")))))	
@@ -713,14 +713,14 @@
 
 			(simple-call (primary)
 				(begin 
-					(define func (interpret-Primary primary env))
+					(define func (Expressed-Value->function (interpret-Primary primary env)))
 					(define res (call-function func empty))
 					res
 				))
 
 			(argument-call (primary arguments)
 				(begin 
-					(define func (interpret-Primary primary env))
+					(define func (Expressed-Value->function (interpret-Primary primary env)))
 					
 					; handle print here of func is print!
 					
