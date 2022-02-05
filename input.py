@@ -36,6 +36,27 @@ def evil_function():
 ;
 
 lazy_arr = [1, evil_function(), 4, 5];
-print(01010101010);
+print(1010101010);
 print(lazy_arr);
 
+def unwanted_function():
+    print(1111111);
+    return 222222;
+;
+
+def good_func(a_function = None, decision = 0):
+    if decision == 0:
+        return 4;
+    else:
+        aa = a_function();
+        return aa;
+    ;
+;
+
+h = unwanted_function;
+g = good_func(h, 0);
+print(g);
+
+h = unwanted_function;
+g = good_func(h, 1);
+print(g);
