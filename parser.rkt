@@ -8,6 +8,7 @@
 (require "grammar-datatypes.rkt")
 (require "interpreter.rkt")
 
+(provide lex-this lexer-imp pythonic-parser interpret-Program)
 
 (define-tokens value-tokens (NUM ID BOOL))
 (define-empty-tokens op-tokens (EOF plus comma lBracket rBracket lParen rParen power minus division mult greater 
@@ -61,7 +62,7 @@
    ))
 
 
-(define simple-math-parser
+(define pythonic-parser
   (parser
    (start Program)
    (end EOF)
@@ -135,9 +136,4 @@
                  ((Expression) (single-expression $1)))
     )))
 
-;test
 (define lex-this (lambda (lexer input) (lambda () (lexer input))))
-(define in (open-input-file "input.py"))
-(define my-lexer (lex-this lexer-imp in))
-(let ((parser-res (simple-math-parser my-lexer))) (interpret-Program parser-res))
-(close-input-port in)
