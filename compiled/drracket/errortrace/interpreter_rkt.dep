@@ -1,1 +1,0 @@
-("8.2" ta6nt ("28441ab6d29697e159ab15a8763df11b982d1589" . "d4a76f0a6e31ba34350b58e6d36b094b4f677cda") #"C:\\Users\\msi pc\\Documents\\GitHub\\PL-Project\\grammar-datatypes.rkt" (collects #"eopl" #"eopl.rkt") (collects #"errortrace" #"errortrace-key.rkt") (collects #"racket" #"main.rkt") (collects #"racket" #"runtime-config.rkt"))
