@@ -48,15 +48,12 @@ def good_func(a_function = None, decision = 0):
     if decision == 0:
         return 4;
     else:
-        aa = a_function();
-        return aa;
+        return a_function();
     ;
 ;
 
-h = unwanted_function;
-g = good_func(h, 0);
+g = good_func(unwanted_function, 0);
 print(g);
 
-h = unwanted_function;
-g = good_func(h, 1);
+g = good_func(unwanted_function, 1);
 print(g);
