@@ -16,7 +16,7 @@
 (define-lex-abbrevs
  (digit (:/ "0" "9"))
  (char-or-digit (:or (:/ "a" "z") (:/ "A" "Z") (:/ "0" "9")))
- (char (:or (:/ "a" "z") (:/ "A" "Z"))))
+ (char (:or (:/ "a" "z") (:/ "A" "Z") "_")))
 
 (define lexer-imp
   (lexer

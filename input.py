@@ -29,3 +29,13 @@ else:
 print(x);
 print(0 * 3);
 print(4 * 3);
+
+def evil_function():
+    print(123123);
+    return 3;
+;
+
+lazy_arr = [1, evil_function(), 4, 5];
+print(01010101010);
+print(lazy_arr);
+

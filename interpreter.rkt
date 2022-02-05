@@ -1,10 +1,11 @@
 #lang racket
 
 (require (lib "eopl.ss"  "eopl"))
+(require racket/promise)
 (require "grammar-datatypes.rkt")
 
-(provide interpret-Program)
 
+(provide interpret-Program)
 
 
 ; environtment
@@ -20,10 +21,11 @@
    (id symbol?)
    (func Expressed-Value?)
    (env Environment?))
-	(extend-env-func-answer
-		(result Expressed-Value?)
-		(env Environment?))
-	 )
+
+  (extend-env-func-answer
+   (result Expressed-Value?)
+   (env Environment?))
+  )
 
 (define apply-env
  (lambda (env search-var)
@@ -31,9 +33,13 @@
 	 (empty-env ()
 		(report-error "apply-env called on empty env"))
 	 (extend-env (saved-var saved-val saved-env)
-		(if (eqv? saved-var search-var)
-		 saved-val
-		 (apply-env saved-env search-var)))
+                     (if (promise? saved-var)
+                         (if (eqv? (force saved-var) search-var)
+                             saved-val
+                             (apply-env saved-env search-var))
+                         (if (eqv? saved-var search-var)
+                             saved-val
+                             (apply-env saved-env search-var))))
    (extend-env-rec (id func saved-env)
 		(if (eqv? search-var id)
 		 func
@@ -70,13 +76,19 @@
 	 (lis list?))
 	(none-type (non null?))
 	(function-expression
-		(f Function?)))
+		(f Function?))
+        (promise
+                (p promise?))
+
+  )
 
 
 (define (Expressed-Value->number expressed-value)
 	(cases Expressed-Value expressed-value
 		(int-number (int)
 			int)
+                (promise (p)
+                         (Expressed-Value->number (force p)))
 	(else (report-error "Expressed-Value->Number called on non number"))
 			))
 
@@ -85,6 +97,8 @@
 	(cases Expressed-Value expressed-value
 		(boolean (bool)
 			bool)
+                (promise (p)
+                         (Expressed-Value->bool (force p)))
 	(else (report-error "Expressed-Value->bool called on non bool"))
 			))
 
@@ -92,12 +106,15 @@
 	(cases Expressed-Value expressed-value
 		(function-expression (f)
 			f)
+                (promise (p)
+                         (Expressed-Value->function (force p)))
 	(else (report-error "Expressed-Value->function called on non function"))
 			))
 
 (define (Expressed-Value->lst expressed-value)
 	(cases Expressed-Value expressed-value
 	       (list-con (ls) ls)
+               (promise (p) (Expressed-Value->lst (force p)))
 	       (else (report-error "Expressed-Value->lst called on non list type"))
  		))
 
@@ -284,7 +301,7 @@
 		(cases Assignment assignment-var 
 			(assignment (id expression)
 				(begin 
-					(define value (interpret-Expression expression env))
+					(define value (delayed-Expression expression env))
 					(list (extend-env id value env) #f)
 				))
 
@@ -301,6 +318,7 @@
 (define Expressed-Value->printable 
 (lambda (inp)
 	      (cases Expressed-Value inp
+                (promise (p) (Expressed-Value->printable (force p)))
 		(int-number (num) num)
 		(float-number (num) num)
 		(boolean (bool) bool)
@@ -448,6 +466,21 @@
 
 			(else (displayln "ooops")))))	
 
+(define delayed-Expression
+  (lambda (expression-var env)
+		(cases Expression expression-var 
+			(disjunction-expression (disjunction)
+				(begin 
+					(promise (delay (interpret-Disjunction disjunction env)))
+				))
+
+			(sum-expression (sum)
+				(begin 
+					(promise (delay (interpret-Sum sum env)))
+				))
+
+			(else (displayln "ooops"))))
+  )
 
 (define interpret-Expression
 	(lambda (expression-var env)
