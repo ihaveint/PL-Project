@@ -27,3 +27,5 @@ else:
     x = l[3];
 ;
 print(x);
+print(0 * 3);
+print(4 * 3);

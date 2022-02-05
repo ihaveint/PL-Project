@@ -633,10 +633,14 @@
 			(muliplication (term factor)
 				(begin 
 					(define left (interpret-Term term env))
-					(define right (interpret-Factor factor env))
-					(define left-num (Expressed-Value->number left))
-					(define right-num (Expressed-Value->number right))
-					(int-number (* left-num right-num))
+                                        (define left-num (Expressed-Value->number left))
+
+                                        (if (eqv? left-num 0)
+                                            (int-number left-num)
+                                            (let* ([right (interpret-Factor factor env)] [right-num (Expressed-Value->number right)])
+                                              (int-number (* left-num right-num))))
+
+                                        
 				))
 
 			(division (term factor)
