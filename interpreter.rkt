@@ -622,20 +622,27 @@
 			(else (displayln "ooops")))))	
 
 
+(define (forcee value)
+  (cases Expressed-Value value
+    (promise (p)
+             (forcee (force p)))
+    (else
+     value
+     )
+    )
+  )
+
 (define interpret-Sum
 	(lambda (sum-var env)
 		(cases Sum sum-var 
 			(addition (sum term)
 				(begin 
-					(define left (interpret-Sum sum env))
+					(define left (forcee (interpret-Sum sum env)))
 					(define right (interpret-Term term env))
-					(displayln left)
-					(displayln right)
 					(cases Expressed-Value left
 						(int-number (lf)
 							(define right-num (Expressed-Value->number right))
-							(int-number (+ lf right-num))
-							)
+							(int-number (+ lf right-num)))
 						(float-number (lf)
 							(define right-num (Expressed-Value->number right))
 						 	(float-number (+ lf right-num)))
@@ -876,4 +883,5 @@
 				))
 
 			(else (displayln "ooops")))))	
+
 
