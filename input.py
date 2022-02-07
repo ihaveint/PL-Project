@@ -1,12 +1,13 @@
-def fact(n = 0):
-    if n < 2:
-        return 1;
-    else:
-        a = n;
-        b = fact(n - 1);
-        return a * b;
-    ;
+def fun(a = 3):
+    b = 3 + a * 4 ** 2;
+		print(b);
+    return b / 2 + 17;
 ;
 
-f = fact(7);
-print(f);
+a = 7;
+print(a);
+c = fun(a - 2);
+print(c);
+b = c + 5;
+print(b);
+

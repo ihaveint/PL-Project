@@ -27,6 +27,7 @@
    [(:: (:+ digit) (:? ".") (:* digit))
     (token-NUM (string->number lexeme))]
    ["+" (token-plus)]
+   ["not" (token-not)]
    ["-" (token-minus)]
    ["*" (token-mult)]
    ["**" (token-power)]

@@ -629,10 +629,13 @@
 				(begin 
 					(define left (interpret-Sum sum env))
 					(define right (interpret-Term term env))
+					(displayln left)
+					(displayln right)
 					(cases Expressed-Value left
 						(int-number (lf)
 							(define right-num (Expressed-Value->number right))
-							(int-number (+ lf right-num)))
+							(int-number (+ lf right-num))
+							)
 						(float-number (lf)
 							(define right-num (Expressed-Value->number right))
 						 	(float-number (+ lf right-num)))
